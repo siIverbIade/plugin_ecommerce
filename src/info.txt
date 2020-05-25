@@ -1,1 +1,0 @@
-aqui entram as classes/módulos/interfaces que irão compor o plugin
