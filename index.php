@@ -15,5 +15,6 @@ $ld->setCountry('BR');
 $gc = new Geocode($ld);
 $gr = $gc->getResponse();
 print_r($gr->formattedAddress());
+print_r($gr->geolocation());
 
 //print_r(json_encode($gc->getResponse()));
