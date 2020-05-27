@@ -8,9 +8,12 @@ use App\plugins\geocode\Geocode;
 use App\plugins\geocode\LocationData;
 
 $ld = new LocationData;
-$ld->setAddress('cep 23067-100');
-$ld->setLocation('BR');
+
+$ld->setPostalCode('23067');
+$ld->setCountry('BR');
+
 $gc = new Geocode($ld);
 $gr = $gc->getResponse();
-print_r($gr->geolocation()->getLatitud());
-//print_r($gc->getResponse()->jsonSerialize());
+print_r($gr->formattedAddress());
+
+//print_r(json_encode($gc->getResponse()));
