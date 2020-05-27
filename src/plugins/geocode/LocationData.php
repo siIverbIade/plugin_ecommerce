@@ -11,11 +11,11 @@ class LocationData
 
     public function __construct(string $address = '', array $components = [], string $place_id = '', GeoCoordinates $coords = null)
     {
-        $this->address =  $address;
-        $this->setComponents($components);
-        $this->place_id =  $place_id;
-        $this->setLatitud($coords->getLatitud());
-        $this->setLongitud($coords->getLongitud());
+        if (!$address == '') $this->address = $address;
+        if (!$components == []) $this->setComponents($components);
+        if (!$place_id == '') $this->place_id =  $place_id;
+        if (!$coords == null) $this->setLatitud($coords->getLatitud());
+        if (!$coords == null) $this->setLongitud($coords->getLongitud());
     }
 
     private static function getSingleParameter(string $name, $value): string
