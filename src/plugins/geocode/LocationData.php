@@ -9,8 +9,13 @@ class LocationData
     private string $place_id;
     private string $latlng;
 
-    public function __construct()
+    public function __construct(string $address = '', array $components = [], string $place_id = '', GeoCoordinates $coords = null)
     {
+        $this->address =  $address;
+        $this->setComponents($components);
+        $this->place_id =  $place_id;
+        $this->setLatitud($coords->getLatitud());
+        $this->setLongitud($coords->getLongitud());
     }
 
     private static function getSingleParameter(string $name, $value): string
@@ -142,7 +147,7 @@ class LocationData
         $this->latlng = implode(',', $latlng);
     }
 
-    public function setlongitud(float $longitud)
+    public function setLongitud(float $longitud)
     {
         if (isset($this->latlng)) {
             $latlng = explode(',', $this->latlng);
