@@ -3,6 +3,7 @@
 namespace App\plugins\geocode;
 
 use JsonSerializable;
+use App\plugins\geocode\GeoCoordinates;
 
 class GeoResponse implements JsonSerializable
 {
@@ -25,6 +26,11 @@ class GeoResponse implements JsonSerializable
         } else {
             return $this->jsonResponse['results'][0][$arg];
         }
+    }
+
+    public function formattedAddress(): string
+    {
+        return $this->jsonResponse['results'][0]['formatted_address'];
     }
 
     public function geolocation(): GeoCoordinates
