@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Spreng\http;
 
-use Spreng\config\SessionConfig;
+use Spreng\config\GlobalConfig;
 use Spreng\security\AuthController;
 use Spreng\system\SystemController;
 use Spreng\system\Collections\ControllerList;
@@ -19,8 +19,8 @@ class RequestHandler
     {
         $this->session = $session;
         $this->controllers = new ControllerList();
-        $this->classes = SessionConfig::getAllImplementationsOf('Spreng\http\RequestController');
-        self::registerAll();
+        $this->classes = GlobalConfig::getAllImplementationsOf(GlobalConfig::getHttpConfig()->getControllersPath(), 'Spreng\http\RequestController');
+        $this->registerAll();
     }
 
     private function fullUrl(string $url): string
@@ -32,7 +32,6 @@ class RequestHandler
     {
         $this->controllers->addController(new AuthController);
         $this->controllers->addController(new SystemController);
-
         foreach ($this->classes as $class => $parentClass) {
             $this->controllers->addController(new $class);
         }
@@ -46,19 +45,17 @@ class RequestHandler
                 $fullUrl = $this->fullUrl($route->url());
                 $method = $route->method();
                 if ($fullUrl == $this->session->rootRequest()) {
-
                     if ($method !== $this->session::method()) {
                         http_response_code(405);
                         return "<h1>ERRO 405 (Método não suportado)</h1><button onclick='window.history.back();'>Voltar</button>";
                     }
-
                     http_response_code($route->httpcode());
 
                     if ($route->redirect() == false) {
                         return $route->response();
                     } else {
                         header("Location: " . $this->fullUrl($route->redirect()));
-                        die();
+                        exit;
                     }
                 }
             }

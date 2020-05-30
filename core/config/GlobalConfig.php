@@ -4,104 +4,90 @@ declare(strict_types=1);
 
 namespace Spreng\config;
 
-use Spreng\system\files\Json;
-use Spreng\config\SessionConfig;
+use Spreng\config\ParseConfig;
 use Spreng\config\type\HttpConfig;
 use Spreng\config\type\ModelConfig;
 use Spreng\config\type\SystemConfig;
 use Spreng\config\type\SecurityConfig;
+use Spreng\system\Loader\SprengClasses;
 use Spreng\config\type\ConnectionConfig;
 
 class GlobalConfig
 {
-    public static function global(): Json
+    public static function getConfig(string $type): array
     {
-        return new Json(__DIR__ . '/setup.json');
-    }
-
-    private static function cfgTypeClass(string $type): string
-    {
-        return 'Spreng\config\type\\' . ucfirst($type) . 'Config';
-    }
-
-    public static function getConfig(string $type): object
-    {
-        $cfgType = self::cfgTypeClass($type);
-        $configObj = new $cfgType;
-        $global = self::global();
-        $global->process();
-        $configObj->asset($global->schemaJSON[$type]);
-        return $configObj;
+        $config = [];
+        if (isset($_SESSION['config'][$type])) {
+            $config = $_SESSION['config'][$type];
+        } else {
+            $config = ParseConfig::getConfig($type)->getConfig();
+            $_SESSION['config'][$type] = $config;
+        }
+        return $config;
     }
 
     public static function getConnectionConfig(): ConnectionConfig
     {
-        return self::getConfig('connection');
+        return new ConnectionConfig(self::getConfig('connection'));
     }
 
     public static function getHttpConfig(): HttpConfig
     {
-        return self::getConfig('http');
+        return new HttpConfig(self::getConfig('http'));
     }
 
     public static function getModelConfig(): ModelConfig
     {
-        return self::getConfig('model');
+        return new ModelConfig(self::getConfig('model'));
     }
 
     public static function getSecurityConfig(): SecurityConfig
     {
-        return self::getConfig('security');
+        return new SecurityConfig(self::getConfig('security'));
     }
 
     public static function getSystemConfig(): SystemConfig
     {
-        return self::getConfig('system');
+        return new SystemConfig(self::getConfig('system'));
     }
 
-    public static function setConnectionConfig(ConnectionConfig $connectionConfig)
+    public static function getAllImplementationsOf(string $baseFolder, string $class): array
     {
-        SessionConfig::setConnectionConfig($connectionConfig);
-        self::saveConfig('connection', $connectionConfig->getConfig());
+        if (isset($_SESSION['config']['classes'])) {
+            return $_SESSION['config']['classes'];
+        } else {
+            $_SESSION['config']['classes'] = SprengClasses::scanFromSource($baseFolder, $class);
+        }
+        return $_SESSION['config']['classes'];
     }
 
-    public static function setHttpConfig(HttpConfig $httpConfig)
+    public static function setConnectionConfig(ConnectionConfig $config)
     {
-        SessionConfig::setHttpConfig($httpConfig);
-        self::saveConfig('http', $httpConfig->getConfig());
+        $_SESSION['config']['connection'] = $config->getConfig();
     }
 
-    public static function setModelConfig(ModelConfig $modelConfig)
+    public static function setHttpConfig(HttpConfig $config)
     {
-        SessionConfig::setModelConfig($modelConfig);
-        self::saveConfig('model', $modelConfig->getConfig());
+        $_SESSION['config']['http'] = $config->getConfig();
     }
 
-    public static function setSecurityConfig(SecurityConfig $securityConfig)
+    public static function setModelConfig(ModelConfig $config)
     {
-        SessionConfig::setSecurityConfig($securityConfig);
-        self::saveConfig('security', $securityConfig->getConfig());
+        $_SESSION['config']['model'] = $config->getConfig();
     }
 
-    public static function setSystemConfig(SystemConfig $systemConfig)
+    public static function setSecurityConfig(SecurityConfig $config)
     {
-        SessionConfig::setSystemConfig($systemConfig);
-        self::saveConfig('system', $systemConfig->getConfig());
+        $_SESSION['config']['security'] = $config->getConfig();
     }
 
-    private static function saveConfig(string $type, array $config)
+    public static function setSystemConfig(SystemConfig $config)
     {
-        $global = self::global();
-        $global->process();
-        $global->schemaJSON[$type] = $config;
-        $global->writeSchemaJSON();
+        $_SESSION['config']['system'] = $config->getConfig();
     }
 
-    public static function saveAll(array $config)
+    public static function clearAll()
     {
-        $global = self::global();
-        $global->process();
-        $global->schemaJSON = $config;
-        $global->writeSchemaJSON();
+        if (isset($_SESSION['config'])) unset($_SESSION['config']);
     }
 }

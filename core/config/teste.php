@@ -1,9 +1,8 @@
 <?php
 
 use Spreng\config\GlobalConfig;
-use Spreng\config\SessionConfig;
 
 require_once dirname(__DIR__, 2) . '/vendor/autoload.php';
 
-$cc1 = SessionConfig::getSystemConfig()->getProjectPath();
+$cc1 = GlobalConfig::getSystemConfig()->getFirstRun();
 print_r($cc1);

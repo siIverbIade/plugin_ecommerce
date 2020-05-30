@@ -44,7 +44,7 @@ class HttpSession
 
     public static function urlParameter(string $name): string
     {
-        return self::urlParameters()[$name];
+        return $this->urlParameters()[$name];
     }
 
     public static function method()

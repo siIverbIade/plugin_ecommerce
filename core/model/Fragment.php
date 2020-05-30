@@ -7,7 +7,7 @@ namespace Spreng\model;
 use Twig\Lexer;
 use Twig\Environment;
 use Spreng\model\Template;
-use Spreng\config\SessionConfig;
+use Spreng\config\GlobalConfig;
 use Twig\Loader\FilesystemLoader;
 
 abstract class Fragment implements Template
@@ -24,8 +24,8 @@ abstract class Fragment implements Template
     private function set(array $obj): string
     {
         $template = $this->template;
-        $modelConfig = SessionConfig::getModelConfig();
-        $rootpath = SessionConfig::getSystemConfig()->getSourcePath() . '\\' . $modelConfig->getTemplateRoot();
+        $modelConfig = GlobalConfig::getModelConfig();
+        $rootpath = GlobalConfig::getSystemConfig()->getSourcePath() . '\\' . $modelConfig->getTemplateRoot();
         $env = new Environment(new FilesystemLoader("$rootpath/$this->folder"), [
             'auto_reload' => $modelConfig->isAutoReloadEnabled(),
             'cache' => "$rootpath/$this->folder/compilation_cache",

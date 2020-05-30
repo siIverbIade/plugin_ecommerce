@@ -4,18 +4,18 @@ namespace Spreng\security;
 
 use DateTime;
 use Spreng\http\HttpSession;
-use Spreng\config\SessionConfig;
+use Spreng\config\GlobalConfig;
 use Spreng\security\SessionUser;
 use Spreng\connection\AuthConnPool;
 
 class Autentication
 {
-    public static function setCredentials(HttpSession $session)
+    public static function readCredentials(HttpSession $session)
     {
-        $secConf = SessionConfig::getSecurityConfig();
+        $secConf = GlobalConfig::getSecurityConfig();
         if (!self::hasAuthenticated() && !in_array($session->rootRequest(), $secConf->allowedUrls())) {
             header("Location: " . $secConf->loginFullUrl());
-            die();
+            exit;
         }
     }
 
@@ -25,7 +25,6 @@ class Autentication
         $password = HttpSession::password();
 
         SessionUser::setLogin($username);
-
         if ($username == '') {
             self::setAuthMessage('Digite o nome de Usuário');
             return false;
@@ -36,7 +35,7 @@ class Autentication
             return false;
         }
 
-        $conn = AuthConnPool::start();
+        $conn = new AuthConnPool;
         $user = $conn::findOne('usuario', ' BINARY login = ?', [$username]);
         $conn::close();
 
@@ -45,7 +44,7 @@ class Autentication
             return false;
         }
 
-        if (password_verify($password, $user->senha)) {
+        if (password_verify($password, $user['senha'])) {
             SessionUser::setNome($username);
             SessionUser::setDetalhes('Logou em ' . (new DateTime())->format('d/m/Y'));
             SessionUser::setAuthToken('1293012930129301293');
