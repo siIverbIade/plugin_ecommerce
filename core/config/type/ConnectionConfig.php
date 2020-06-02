@@ -8,6 +8,12 @@ use Spreng\config\type\Config;
 
 class ConnectionConfig extends Config
 {
+
+    public function __construct(array $config = [])
+    {
+        $this->config = $config;
+    }
+
     public function getUrl(string $origin): string
     {
         return $this->getOneConfig($origin)['url'];

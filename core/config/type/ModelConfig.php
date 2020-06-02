@@ -8,6 +8,11 @@ use Spreng\config\type\Config;
 
 class ModelConfig extends Config
 {
+    public function __construct(array $config = [])
+    {
+        $this->config = $config;
+    }
+
     public function getTemplateRoot()
     {
         return $this->getOneConfig('templates_root');

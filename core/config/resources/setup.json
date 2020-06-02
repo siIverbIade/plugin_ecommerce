@@ -11,18 +11,22 @@
         "system": {
             "url": "localhost",
             "port": "3306",
-            "database": "geocode_testes",
+            "database": "attribut_teste",
             "user": "root",
             "password": "",
             "regenerate": true
         }
     },
     "http": {
-        "listen_port": "80"
+        "listen_port": "80",
+        "controllers_path": "controladores"
     },
     "model": {
         "templates_root": "resources/templates",
         "auto_reload": true
+    },
+    "orm": {
+        "entities_path": "entidades"
     },
     "security": {
         "default_user": {
@@ -30,18 +34,18 @@
             "password": "admin"
         },
         "login_url": "/login",
-        "auth_url": "/access",
+        "auth_url": "/auth/access",
         "start_url": "/home",
         "logout_url": "/logout",
         "allowed_urls": [
-            "/sysinfo",
-            "/ola"
+            "/sysinfo"
         ]
     },
     "system": {
         "autoloader": {
             "source_class": "App\\",
             "source_path": "C:\\xampp\\htdocs\\Extrator-7.3\\src"
-        }
+        },
+        "first_run": true
     }
 }

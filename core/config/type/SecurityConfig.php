@@ -11,8 +11,9 @@ class SecurityConfig extends Config
 {
     private string $root_url;
 
-    public function __construct()
+    public function __construct(array $config = [])
     {
+        $this->config = $config;
         $this->root_url = HttpSession::rootUrl();
     }
 

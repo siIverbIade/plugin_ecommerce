@@ -8,6 +8,11 @@ use Spreng\config\type\Config;
 
 class HttpConfig extends Config
 {
+    public function __construct(array $config = [])
+    {
+        $this->config = $config;
+    }
+
     public function getListenPort(): string
     {
         return $this->getOneConfig('listen_port');
@@ -16,5 +21,15 @@ class HttpConfig extends Config
     public function setListenPort(string $val)
     {
         return $this->setOneConfig('listen_port', $val);
+    }
+
+    public function getControllersPath(): string
+    {
+        return $this->getOneConfig('controllers_path');
+    }
+
+    public function setControllersPath(string $val)
+    {
+        return $this->setOneConfig('controllers_path', $val);
     }
 }

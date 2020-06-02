@@ -10,6 +10,8 @@ class SystemController extends RequestController
 {
     public static function message()
     {
-        return new HttpResponse('/alert', System::Message());
+        return new HttpResponse(function () {
+            return System::Message();
+        }, '/message');
     }
 }

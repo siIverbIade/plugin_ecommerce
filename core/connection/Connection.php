@@ -4,50 +4,101 @@ declare(strict_types=1);
 
 namespace Spreng\connection;
 
-require_once 'rb.php';
+require 'rb.php';
 
-use Exception;
 use R;
 use PDO;
 use PDOException;
+use Spreng\config\GlobalConfig;
 
 class Connection extends R
 {
-    private $enderecoDB; //endereço do mysql
-    private $nomeDB; //nome do banco
-    private $usuarioDB; //nome de usuário
-    private $senhaDB; //senha de acesso
+    private array $connections;
+    private string $selectedDB;
 
-    public function __construct(string $endereco, string $nome, string $usuario, string $senha = "", bool $conecta = true)
+    public function __construct(string $currentDB, bool $autoload = true)
     {
-        $this->enderecoDB = $endereco; //endereço do mysql
-        $this->nomeDB = $nome; //nome do banco
-        $this->usuarioDB = $usuario; //nome de usuário
-        $this->senhaDB = $senha; //senha de acesso
-
-        if ($conecta) {
-            self::conectaDB();
+        $config = GlobalConfig::getConnectionConfig()->getConfig();
+        $this->connections = $config;
+        foreach ($config as $db => $param) {
+            if (!self::testConnection()) self::addDatabase($db, "mysql:host=" . $param['url'] . ":" . $param['port'] . ";dbname=" . $param['database'], $param['user'], $param['password']);
+        }
+        if ($autoload) {
+            $this->selectedDB = $currentDB;
+            $this->regenerate();
+            $this->pickDatabase($currentDB);
         }
     }
 
-    public function conectaDB()
+    public function getUrl(): string
     {
-        if (!self::testConnection()) self::setup("mysql:host=" . $this->enderecoDB . ";dbname=" . $this->nomeDB, $this->usuarioDB, $this->senhaDB);
-        /*
-        if (self::testConnection()) { //testa se a conexão foi bem sucedida
-            //echo "Conexão bem sucedida!\n";
-            return true;
-        } else {
-            //echo "Falha na conexão!!\n";
-            self::close();
-            return false;
-        }*/
+        return $this->connections[$this->selectedDB]['url'];
+    }
+
+    public function getPort(): string
+    {
+        return $this->connections[$this->selectedDB]['port'];
+    }
+
+    public function getDatabase(): string
+    {
+        return $this->connections[$this->selectedDB]['database'];
+    }
+
+    public function getUser(): string
+    {
+        return $this->connections[$this->selectedDB]['user'];
+    }
+
+    public function getPassword(): string
+    {
+        return $this->connections[$this->selectedDB]['password'];
+    }
+
+    public function allowRegenerate(): bool
+    {
+        return $this->connections[$this->selectedDB]['regenerate'];
+    }
+
+    public function pickDatabase($key)
+    {
+        $this->selectedDB = $key;
+        self::selectDatabase($key, $force = FALSE);
+    }
+
+    public function getConfig(string $db): array
+    {
+        return $this->connections[$db];
+    }
+
+    public function regenerate()
+    {
+        if ($this->allowRegenerate()) $this->new();
+    }
+
+    protected function new()
+    {
+        $url = $this->getUrl() . ":" . $this->getPort();
+        $db = $this->getDatabase();
+        $user = $this->getUser();
+        $password = $this->getPassword();
+        try {
+            $dbh = new PDO("mysql:host=$url", $user, $password);
+
+            $dbh->exec("CREATE DATABASE IF NOT EXISTS `$db`;
+                CREATE USER IF NOT EXISTS'$user'@'$url' IDENTIFIED BY '$password';
+                GRANT ALL ON `$db`.* TO '$user'@'$url';
+                FLUSH PRIVILEGES;");
+        } catch (PDOException $e) {
+        }
+        $dbh = null;
     }
 
     public function getConnectionLog(): string
     {
+        $currentDB = $this->selectedDB;
         try {
-            $db = new PDO("mysql:host=" . $this->enderecoDB . ";dbname=" . $this->nomeDB, $this->usuarioDB, $this->senhaDB);
+            $db = new PDO("mysql:host=" . $this->connections[$currentDB]['url'] . ":" . $this->connections[$currentDB]['port'] . ";dbname=" . $this->connections[$currentDB]['database'], $this->connections[$currentDB]['user'], $this->connections[$currentDB]['password']);
             $return = "OK";
         } catch (PDOException $e) {
             $return = $e->getmessage();
@@ -55,53 +106,12 @@ class Connection extends R
         return $return;
     }
 
-    public function getEndereco(): string
-    {
-        return $this->enderecoDB;
-    }
-    public function getNome(): string
-    {
-        return $this->nomeDB;
-    }
-    public function getUsuario(): string
-    {
-        return $this->usuarioDB;
-    }
-    public function getSenha(): string
-    {
-        return $this->senhaDB;
-    }
-
-    public function setEndereco(string $endereco)
-    {
-        $this->enderecoDB = $endereco;
-        self::conectaDB($this->enderecoDB, $this->nomeDB, $this->usuarioDB, $this->senhaDB);
-    }
-
-    public function setNome(string $nome)
-    {
-        $this->nomeDB = $nome;
-        self::conectaDB($this->enderecoDB, $this->nomeDB, $this->usuarioDB, $this->senhaDB);
-    }
-
-    public function setUsuario(string $usuario)
-    {
-        $this->usuarioDB = $usuario;
-        self::conectaDB($this->enderecoDB, $this->nomeDB, $this->usuarioDB, $this->senhaDB);
-    }
-
-    public function setSenha(string $senha)
-    {
-        $this->senhaDB = $senha;
-        self::conectaDB($this->enderecoDB, $this->nomeDB, $this->usuarioDB, $this->senhaDB);
-    }
-
     public static function persist($obj)
     {
         self::store(self::dispense($obj)); // persiste a entidade com o RedBean
     }
 
-    public static function persistIndex($indexValue, string $indexName, $obj)
+    public function persistIndex($indexValue, string $indexName, $obj)
     {
         $load = self::findOne($obj['_type'], "$indexName = ?", [$indexValue]);
         if (is_null($load)) {

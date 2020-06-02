@@ -29,7 +29,7 @@ class Json
 
     public function writeSchemaJSON()
     {
-        return fwrite(fopen($this->schemaFilePath, "w"), json_encode($this->schemaJSON));
+        return fwrite(fopen($this->schemaFilePath, "w"), json_encode($this->schemaJSON, JSON_PRETTY_PRINT));
     }
 
     public function getSchemaString(): string
