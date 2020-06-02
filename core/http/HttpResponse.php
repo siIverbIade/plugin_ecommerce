@@ -6,18 +6,18 @@ namespace Spreng\http;
 
 class HttpResponse
 {
-    private string $url;
+    private $url;
     private string $method;
-    private string $response;
+    private $response;
     private $redirect;
     private int $httpcode;
 
-    public function __construct(string $url, string $response, $redirect = false, string $method = 'GET', int $httpcode = 200)
+    public function __construct(callable $callback = null, $url = false,  $redirect = false, string $method = 'GET', int $httpcode = 200)
     {
+        $this->response = $callback;
         $this->url = $url;
-        $this->method = $method;
         $this->redirect = $redirect;
-        $this->response = $response;
+        $this->method = $method;
         $this->httpcode = $httpcode;
     }
 

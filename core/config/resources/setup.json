@@ -34,12 +34,11 @@
             "password": "admin"
         },
         "login_url": "/login",
-        "auth_url": "/access",
+        "auth_url": "/auth/access",
         "start_url": "/home",
         "logout_url": "/logout",
         "allowed_urls": [
-            "/sysinfo",
-            "/ola"
+            "/sysinfo"
         ]
     },
     "system": {

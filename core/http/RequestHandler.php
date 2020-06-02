@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Spreng\http;
 
 use Spreng\config\GlobalConfig;
+use Spreng\system\utils\FileUtils;
 use Spreng\security\AuthController;
 use Spreng\system\SystemController;
 use Spreng\system\Collections\ControllerList;
@@ -23,7 +24,7 @@ class RequestHandler
         $this->registerAll();
     }
 
-    private function fullUrl(string $url): string
+    private function fullUrl($url): string
     {
         return $this->session::rootUrl() . $url;
     }
@@ -40,21 +41,28 @@ class RequestHandler
     public function processRequest()
     {
         foreach ($this->controllers->getAll() as $ctl) {
-            foreach ($ctl->getFnRoutes() as $name) {
-                $route = $ctl->{$name}();
-                $fullUrl = $this->fullUrl($route->url());
-                $method = $route->method();
+            $ctlShifted = $ctl->getFnRoutes();
+            //$class = strtolower(str_replace('Main', '', str_replace('Controller', '', FileUtils::fileName($ctlShifted[0]))));
+            //array_shift($ctlShifted);
+            foreach ($ctlShifted as $name) {
+                $response = $ctl->{$name}();
+                $fullUrl = $this->fullUrl($ctl->getRootUrl() . $response->url());
+                $method = $response->method();
                 if ($fullUrl == $this->session->rootRequest()) {
+                    //echo $fullUrl . "</br>";
+                    //echo $this->session->rootRequest() . "</br>";
                     if ($method !== $this->session::method()) {
                         http_response_code(405);
                         return "<h1>ERRO 405 (Método não suportado)</h1><button onclick='window.history.back();'>Voltar</button>";
                     }
-                    http_response_code($route->httpcode());
 
-                    if ($route->redirect() == false) {
-                        return $route->response();
+                    http_response_code($response->httpcode());
+
+                    if ($response->redirect() == false) {
+                        return $response->response()();
                     } else {
-                        header("Location: " . $this->fullUrl($route->redirect()));
+                        if (!$response->response() == null) $response->response()();
+                        header("Location: " . $this->fullUrl($response->redirect()));
                         exit;
                     }
                 }
