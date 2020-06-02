@@ -3,6 +3,7 @@
     "description": "Plugin Eccomerce Curly",
     "license": "proprietary",
     "require": {
+		"twig/twig": "^3.0",
         "monolog/monolog": "^2.0.0"
     },
     "autoload": {
