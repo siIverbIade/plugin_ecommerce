@@ -27,9 +27,14 @@ class Json
         $this->schemaFilePath = $schemaJSON;
     }
 
+    public function getSchemaJSON()
+    {
+        return $this->schemaJSON;
+    }
+
     public function writeSchemaJSON()
     {
-        return fwrite(fopen($this->schemaFilePath, "w"), json_encode($this->schemaJSON, JSON_PRETTY_PRINT));
+        return fwrite(fopen($this->schemaFilePath, "w"), json_encode($this->schemaJSON, JSON_PRETTY_PRINT + JSON_UNESCAPED_SLASHES));
     }
 
     public function getSchemaString(): string

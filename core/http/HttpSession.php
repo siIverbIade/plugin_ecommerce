@@ -20,6 +20,24 @@ class HttpSession
         }
     }
 
+    public static function name(string $varName, string $ifNull): string
+    {
+        if (isset($_GET[$varName])) {
+            return $_GET[$varName];
+        } elseif (isset($_POST[$varName])) {
+            return $_POST[$varName];
+        } else {
+            return $ifNull;
+        }
+    }
+
+    public static function files(): array
+    {
+        if (isset($_FILES["file"])) {
+            return $_FILES["file"];
+        }
+    }
+
     public static function rootUrl(): string
     {
         return '/' . explode('/', $_SERVER['REQUEST_URI'])[1];
@@ -42,7 +60,7 @@ class HttpSession
         return $params;
     }
 
-    public static function urlParameter(string $name): string
+    public function urlParameter(string $name): string
     {
         return $this->urlParameters()[$name];
     }

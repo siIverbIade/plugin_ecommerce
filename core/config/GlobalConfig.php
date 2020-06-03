@@ -12,7 +12,7 @@ use Spreng\config\type\SecurityConfig;
 use Spreng\system\Loader\SprengClasses;
 use Spreng\config\type\ConnectionConfig;
 
-class GlobalConfig
+class GlobalConfig extends ParseConfig
 {
     public static function getConfig(string $type): array
     {
@@ -20,7 +20,7 @@ class GlobalConfig
         if (isset($_SESSION['config'][$type])) {
             $config = $_SESSION['config'][$type];
         } else {
-            $config = ParseConfig::getConfig($type)->getConfig();
+            $config = self::loadConfig($type)->getConfig();
             $_SESSION['config'][$type] = $config;
         }
         return $config;
@@ -63,26 +63,31 @@ class GlobalConfig
 
     public static function setConnectionConfig(ConnectionConfig $config)
     {
+        parent::setConnectionConfig($config);
         $_SESSION['config']['connection'] = $config->getConfig();
     }
 
     public static function setHttpConfig(HttpConfig $config)
     {
+        parent::setHttpConfig($config);
         $_SESSION['config']['http'] = $config->getConfig();
     }
 
     public static function setModelConfig(ModelConfig $config)
     {
+        parent::setModelConfig($config);
         $_SESSION['config']['model'] = $config->getConfig();
     }
 
     public static function setSecurityConfig(SecurityConfig $config)
     {
+        parent::setSecurityConfig($config);
         $_SESSION['config']['security'] = $config->getConfig();
     }
 
     public static function setSystemConfig(SystemConfig $config)
     {
+        parent::setSystemConfig($config);
         $_SESSION['config']['system'] = $config->getConfig();
     }
 
