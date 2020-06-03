@@ -6,7 +6,6 @@ namespace Spreng\config;
 
 use Spreng\system\files\Json;
 use Spreng\config\type\Config;
-use Spreng\config\GlobalConfig;
 use Spreng\config\type\HttpConfig;
 use Spreng\config\type\ModelConfig;
 use Spreng\config\type\SystemConfig;
@@ -15,7 +14,7 @@ use Spreng\config\type\ConnectionConfig;
 
 class ParseConfig
 {
-    public static function global(): Json
+    private static function global(): Json
     {
         return new Json(__DIR__ . '/resources/setup.json');
     }
@@ -25,7 +24,7 @@ class ParseConfig
         return 'Spreng\config\type\\' . ucfirst($type) . 'Config';
     }
 
-    public static function getConfig(string $type): Config
+    protected static function loadConfig(string $type): Config
     {
         $cfgType = self::cfgTypeClass($type);
         $configObj = new $cfgType;
@@ -37,56 +36,51 @@ class ParseConfig
 
     public static function getConnectionConfig(): ConnectionConfig
     {
-        return self::getConfig('connection');
+        return self::loadConfig('connection');
     }
 
     public static function getHttpConfig(): HttpConfig
     {
-        return self::getConfig('http');
+        return self::loadConfig('http');
     }
 
     public static function getModelConfig(): ModelConfig
     {
-        return self::getConfig('model');
+        return self::loadConfig('model');
     }
 
     public static function getSecurityConfig(): SecurityConfig
     {
-        return self::getConfig('security');
+        return self::loadConfig('security');
     }
 
     public static function getSystemConfig(): SystemConfig
     {
-        return self::getConfig('system');
+        return self::loadConfig('system');
     }
 
     public static function setConnectionConfig(ConnectionConfig $connectionConfig)
     {
-        GlobalConfig::setConnectionConfig($connectionConfig);
         self::saveConfig('connection', $connectionConfig->getConfig());
     }
 
     public static function setHttpConfig(HttpConfig $httpConfig)
     {
-        GlobalConfig::setHttpConfig($httpConfig);
         self::saveConfig('http', $httpConfig->getConfig());
     }
 
     public static function setModelConfig(ModelConfig $modelConfig)
     {
-        GlobalConfig::setModelConfig($modelConfig);
         self::saveConfig('model', $modelConfig->getConfig());
     }
 
     public static function setSecurityConfig(SecurityConfig $securityConfig)
     {
-        GlobalConfig::setSecurityConfig($securityConfig);
         self::saveConfig('security', $securityConfig->getConfig());
     }
 
     public static function setSystemConfig(SystemConfig $systemConfig)
     {
-        GlobalConfig::setSystemConfig($systemConfig);
         self::saveConfig('system', $systemConfig->getConfig());
     }
 
